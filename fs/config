@@ -1,0 +1,5 @@
+hub,1,/tmp/kel1,/tmp/dbkel1,127.0.0.1,3010
+triffid,7,/tmp/triffid,/tmp/dbtriffid,127.0.0.1,3040
+hyper,11,/tmp/hyper,/tmp/dbhyper,127.0.0.1,3070
+jay,17,/tmp/hyper,/tmp/dbhyper,127.0.0.1,3100
+test,21,/tmp/hyper,/tmp/dbhyper,127.0.0.1,3130

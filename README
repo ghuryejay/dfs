@@ -1,0 +1,14 @@
+'raft/core' folder has files implementing acutal raft algorithm. You will need to run raft.go file to start each raft server. It will need two arguments 'name' and 'lines'. I have used the config file which is there in this folder. Here are some specfications:
+
+1. I have used a random timeout between 150-300 milisecond for elections. 
+2. I have used 50ms timeout to send heartbeat to other raft servers.
+3. If just leader is up and there are not enough replicas to commit the message, I have used 2 second timeout to resend the message to all other replicas in case that message does not get commited by that time. 
+4. In case of joint consensus, I have logged size change entry in all replicas' logs. 
+5. I have dumped the state of each replica in leveldb. If you kill the replica and start it again, it will read term, log and voted for from level db and used it for further operations. 
+6. I have logged json of whole entry to the log (you can see index too for each entry). 
+7. For file system client, I have kept timeout for request socket. This is to handle the case where the replica to which it sends value request, if that is down, FS should not wait indefinitely. Instead, it will try for another server. 
+8. Catch-ups are used for lagging leaders and for newly joined leaders in joint consensus. 
+9. The fs folder contains P4 with modification for sending hashes to raft replica. 
+10. I have used same config file in both fs and raft. 
+11. Log files will be generated in the same directory as raft.go
+

@@ -1,0 +1,74 @@
+package dfs
+
+import (
+	"time"
+	"strings"
+)
+
+func copyNode(src, dest *Node) {
+	dest.Name = src.Name
+	dest.Attrs = src.Attrs
+	dest.parent = src.parent
+	dest.kids = src.kids
+	dest.ChildVids = src.ChildVids
+	dest.data = src.data
+	dest.DataBlocks = src.DataBlocks
+	dest.PreVersion = src.PreVersion
+}
+
+
+func Rec(n *Node) string {
+	if len(n.kids) == 0 {
+		y := new(Node)
+		if len(n.data) > 0 {
+			SaveChunks(n)
+		}
+		copyNode(n,y)
+		y.FlushTime = time.Now()
+		marshalnd := MarshalNode(y)
+		hashnd := GetHash([]byte(marshalnd))
+		n.PreVersion = hashnd
+		AddToStore(y)
+		n.metaDirty = false
+		return hashnd
+	} else {
+		for k, v := range n.kids {
+			if i := strings.Index(v.Name, "@");i >= 0 {
+				continue
+			}
+			if v.metaDirty == true {
+				n.ChildVids[k] = Rec(v)
+			}
+		}
+		k := new(Node)
+		if len(n.data) > 0 {
+			SaveChunks(n)
+		}
+		copyNode(n,k)
+		k.FlushTime = time.Now()
+		marshalnd := MarshalNode(k)
+		hashnd := GetHash([]byte(marshalnd))
+		n.PreVersion = hashnd
+		AddToStore(k)
+		n.metaDirty = false
+		return hashnd
+	}
+}
+
+//marks parents till root as dirty
+func MarkDirty(node *Node) {
+	currNode := node
+	for currNode != nil {
+		currNode.metaDirty = true
+		currNode = currNode.parent
+	}
+}
+
+// fuction for asynchronous writes, should run after every 5 seconds
+func AsyncUpdate() {
+	head := Rec(root)
+	Put([]byte("head"), []byte(head))
+}
+
+// function who call asycUpdate every 5 seconds 
+
